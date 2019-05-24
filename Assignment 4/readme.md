@@ -1,1 +1,1 @@
-                                    <h3> Architectural Basics <h3>
+<h3> Architectural Basics <h3>
