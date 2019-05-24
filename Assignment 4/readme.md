@@ -1,6 +1,3 @@
-<h1> Architectural Basics <h1>
-
-  
   1.  Kernels and how do we decide the number of kernels?
   2.  3x3 Convolutions,
   3.  How many layers,
