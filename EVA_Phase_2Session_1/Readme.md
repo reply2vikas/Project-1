@@ -2,4 +2,7 @@
 
 ![Traiing & Validation Loss](https://github.com/reply2vikas/Project-1/blob/master/EVA_Phase_2Session_1/download%20(1).png)
 
-[Final Output](https://colab.research.google.com/drive/1fOjQuddLFUxmEP2iAuQT8wpKKxgSwNI1#scrollTo=EEFJjlGwhcHI&line=2&uniqifier=1)
+Final Output-
+25000/25000 [==============================] - 1s 41us/step
+[1.1438088365936279, 0.6578]
+
