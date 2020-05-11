@@ -1,38 +1,73 @@
-Problem statement:
+TD3 Implementation on RL Environment   
+Final Goal
 
-On a map environment of city we have to run the car(agent) from one location(goal) to the other.
-Using TD3 algorithm to train the continuous policy estimation model.
-Extract patch which contains car and its surroundings, can be used as state and use CNN based neural network model for actor-critic networks.
-"img_map_car.png" image above is the sample image of the map with car image pasted on it.
+To make a car learn to drive on the roads of a map (RL environment) using TD3 theory.
+Video - https://youtu.be/pigvys7b_Xw
+What was the Approach-
+These are the steps
 
-"patch_4040.png" is the patch of image resized to 40x40 which also contains the car corrected with orientation, will be sent to the CNN models as part of state information.
+    Understood the TD3 architecture and the way to implement it for the environments - AntBulletEnv-v0, Walker2DBulletEnv-v0 and HalfCheetahBulletEnv-v0.
 
-Changes made from the Session-7 Assginment:
+    Printed the different environment variables like Action Space, Observation Space - their low, high and sample values.
 
-1. Replaced dqn with TD3: TD3 is policy estimation algorith, which contains 6 NN models in total. Two actor models -- actor model, actor target Four critic models -- two critic models, two critic targets.
+    print(env.observation_space.high) - [inf inf inf inf inf inf inf inf inf inf inf inf inf inf inf inf inf inf inf inf inf inf]
 
-*three model networks take input from the curret state(s) and its action(a). *three target networks take input from the nest state(s') and next action(a'). For detailed theoritical understanding with code please refer to this link https://github.com/reply2vikas/2018-cycle-2/tree/master/P2S9.
+    print(env.observation_space.low) - [-inf -inf -inf -inf -inf -inf -inf -inf -inf -inf -inf -inf -inf -inf -inf -inf -inf -inf -inf -inf -inf -inf]
 
-2. State space: For state input we are using an 60x60 patch of sand image around the current car location. Resized it to 40x40 using cv2. These patches are stored into the Replay Buffer and subsiquently sampled in batches to be used for training the TD3 models. Along with Image, car orientation (two values -ve and +ve) values are sent as state information. In total state space, representing each state is one image of dimentions 60x60 resized to 40x40, and a vector a two values representing car orientation.
+    print(env.action_space.high) - [1. 1. 1. 1. 1. 1.]
 
-3. Action space: Since the TD3 allowes us the flexibility of continuous action spaces. We are using one output dimention to represent the angle of car. This single output value estimates values in the range of -5 to 5, which is also the range of car rotation from left extream to right extream. This is seen as a regresion problem on the side of actor model.
+    print(env.action_space.low) - [-1. -1. -1. -1. -1. -1.]
 
-4. Episode termination states: On reaching goal(with +ver reward) or the boundery of the map(with -ve reward) the episode termination step is reached. Episode also ends if the car does not reach the map wall or goal in 2000 steps, here -ve reward is given. In total I have used 7 gols which will be targetted one after the other:
+    env.env.action_space.sample() - array([-0.58517057, -0.5024034 , -0.6100568 , -0.88058037, -0.14023775, -0.7811404 ], dtype=float32)
 
-    # A = (1420,622)  b = (9,85)  C = (580,530) D = (780,360) 
-    # E = (1100,310) F = (115,450) G = (1050,600)
-After the end of episode is reached variable Done = 1, and the the car is reset to a random location in the map. Also after teh end of episode the training starts for the number of steps equal to the number of step in the previous episode.
+    env.observation_space.sample() - array([ 0.2560038 , 1.2759786 , 0.5100617 , 0.6512928 , 1.6200854 , -0.28926647, 0.06890053, -1.6094683 , -0.9811666 , 0.12742993, 1.3960222 , -0.04613981, -0.8242046 , -1.4867542 , 0.11702857, -0.76355684, 0.7695135 , 0.3610245 , 1.0636773 , -1.0533894 , 0.5983344 , -0.1122881 ], dtype=float32)
 
-Since I am running first 2000 steps with uniform random sampling from the range of -5 to 5 as action to be sent to the car. First few episodes will perform random exloration. Subsiquently the actions to move the car will come from policy model(model actor). Even here I am introducing 20% random action being seleted for some exploration scope.
+    Explored the available Github of pybullet to understand these variables - https://github.com/bulletphysics/bullet3/blob/ec2b6dd920135a5df804d521727cc06446a6a3bd/examples/pybullet/gym/pybullet_envs/robot_locomotors.py#L103
 
-5.Neural network model for actor-critic: Since our input is state is an image I have used CNN based model for both actor and critic models. To feed both state(s) and action(a) together to the critic models is tricky because concatinating two tensors of different dimentions is not possible. And they are also of different feature type. For this to work, passed the image through the cnn and after the flatten layer the output is 1-dimentional feature vector, this is concatinated to the action value and followed up with two more fully connected layers.
+    Went through Github of CarRacing-v0 and Atari environments to understand how to implement TD3 when image screenshots of the environment are required.
 
-CURRENT STATUS
+    Understood the "step" function of the environment.
 
-I have included td3 into the car-map environment with out any issue. Everything is properly integrated.
+Steps done for EndGame assignment
 
-But the policy netork does not estimate good actions, in a way it is giving similar values every time. Resulting in car taking circular turns in the same location.
-
-I am using a CPU based pc with a ram size of 4GB and dual cpu (celeron Laptop) cores.
-
-I tried my level best by integrted everything into code linked here for the TD3.
+    Keeping the sensors as-is, changed the DQN architecture to TD3 architecture (without CNN. Similar to "walker" environment) to make it work.
+    After Step 1 was completed, implemented TD3 with a cropped image as input to Actor network. This cropped image did not have car image embedded into it. I made this work first. Parameters in this approach were as below:
+        State - Cropped image of size 80x80 reduced to 32x32 for the CNN.
+        Replay Buffer
+            State (cropped image without car)
+            Next State (cropped image from sand image from the car's new position based on the action taken)
+            Reward for the action taken
+            Action taken
+            Done (defined it to True when the car hits the walls or when it reaches both the targets or when the episode is completed)
+    After Step 2 was completed, improvised the image by embedding the car into it taking its angle into consideration, but the image of the car was surrounded by a rectangle around it! Continued with the same Replay Buffer and same parameters. Modified parameters were as below:
+        State - Cropped image of size 160x160 along with car placed considering its angle reduced to 32x32 for the CNN.
+        Replay Buffer
+            State (cropped image with car)
+            Next State (cropped image from sand image from the car's new position based on the action taken)
+            Reward for the action taken
+            Action taken
+            Done (defined it to True when the car hits the walls or when it reaches both the targets or when the episode is completed)
+    Added "Orientation (-Orientation, Orientation)" parameters as additional states and removed car image from the cropped image instead rotating the cropped image based on car's angle. Modified parameters were as below:
+        States - Cropped Image rotated in car's angle, -Orientation, Orientation
+        Replay Buffer
+            States (cropped image rotated in car's angle, -orientation, orientation)
+            Next States (cropped image rotated in car's angle from the car's new position and angle, -orientation, orientation based on the action taken)
+            Reward for the action taken based on the "Distance"
+            Action taken
+            Done (defined it to True when the car hits the walls or when it reaches both the targets or when the episode is completed)
+    Added "Distance" parameter as an additional state but this resulted in rotation issue. I tried to fix the rewards, crop size, max_action but nothing worked for me. Modified parameters are as below:
+        States - Cropped Image rotated in car's angle, -Orientation, Orientation, Distance
+        Replay Buffer
+            States (cropped image rotated in car's angle, -Orientation, Orientation, Distance)
+            Next States (cropped image rotated in car's angle, -Orientation, Orientation, Distance based on the action taken)
+            Reward for the action taken based on the "Distance"
+            Action taken
+            Done (defined it to True when the car hit the walls or when it reached target or when the episode was completed)
+    Continued to consider only 3 states for my implementation - Cropped Image rotated in car's angle, -Orientation, Orientation.
+    Improvised the Rewards strategy.
+        As I observed that when car gets stuck at the walls, it was not able to come out of that state. To overcome this scenario, I am checking for the episode timesteps and if the episode goes to "Done" within 5 timesteps, I am giving high penalty.
+        As car mostly goes on sand and less on roads, I am maintaining a counter on how many timesteps the car has gone on sand and penalizing if the car is continuously on sand or is on sand within the initial timesteps of an episode. Also, ending the episode when the car stays on sand for certain number of timesteps continuously.
+    Tuned hyperparameters like Learning Rate, max_action, crop size, CNN embedding dimension.
+    Every time Done becomes true, I am resetting the car's position randomly.
+    Saving the models when it is Done (=True) and when Episode reward is positive.
+    Implemented the inferencing using best positive episode reward models.
