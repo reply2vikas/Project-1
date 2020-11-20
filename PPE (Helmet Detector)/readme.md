@@ -1,0 +1,1 @@
+I have to do project on Helmet Detector (PP.E) with the unstructured data (around of 350 images). One thing I could not understand that how I can club/ imbedded the final output of project to MediaPipe UI
